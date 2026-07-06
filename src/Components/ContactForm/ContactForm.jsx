@@ -1,21 +1,25 @@
-import { useState } from "react";
+import { useRef } from "react";
+import { useContacts } from "../ContactsContext/ContactsContext";
 import "./ContactForm.css";
 
-export const ContactForm = ({ onSubmit }) => {
-  const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
-
-  const handleChange = (e) => {
-    const { name: field, value } = e.currentTarget;
-    if (field === "name") setName(value);
-    if (field === "number") setNumber(value);
-  };
+export const ContactForm = () => {
+  const { addContact } = useContacts();
+  const nameRef = useRef(null);
+  const numberRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ name, number });
-    setName("");
-    setNumber("");
+
+    const name = nameRef.current.value;
+    const number = numberRef.current.value;
+
+    const wasAdded = addContact({ name, number });
+
+    if (wasAdded) {
+      nameRef.current.value = "";
+      numberRef.current.value = "";
+      nameRef.current.focus();
+    }
   };
 
   return (
@@ -27,8 +31,7 @@ export const ContactForm = ({ onSubmit }) => {
           name="name"
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
           title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-          value={name}
-          onChange={handleChange}
+          ref={nameRef}
           required
         />
       </label>
@@ -39,8 +42,7 @@ export const ContactForm = ({ onSubmit }) => {
           name="number"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-          value={number}
-          onChange={handleChange}
+          ref={numberRef}
           required
         />
       </label>
